@@ -38,7 +38,7 @@ var FSHADER_SOURCE =
   '    vec3 reflectVec = reflect(-lightDir, normal);\n' + // получаем вектор отраженного луча
   '    specular = pow(max(dot(reflectVec, viewVec), 0.0), 160.0);\n' +
   '  }\n' +
-  '  gl_FragColor.rgb = vec3(0.1,0.1,0.1) + vec3(0, 1, 1) * d + specular;\n' + // отраженный свет равен сумме фонового, диффузного и зеркального отражений света
+  '  gl_FragColor.rgb = vec3(0.1,0.1,0.1) + vec3(1, 0, 0) * d + specular;\n' + // отраженный свет равен сумме фонового, диффузного и зеркального отражений света
   '  gl_FragColor.a = 1.0;\n' +
   '}\n';
 
