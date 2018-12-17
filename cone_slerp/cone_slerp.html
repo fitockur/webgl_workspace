@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Cone_slerp</title>
+    <style>
+      .layer1 {
+       float: left; /* Обтекание по правому краю */
+       width: 550px; /* Ширина слоя */
+      }
+      .layer2 {
+       background-color: #c0c0c0; /* Цвет фона слоя */
+       padding: 10px; /* Поля вокруг текста */
+       width: 300px; /* Ширина слоя */
+       height: 530px;
+       float: left; /* Обтекание по правому краю */
+      }
+      .can {
+        background-color: black;
+      }
+     </style>
+  </head>
+
+  <body> 
+      <div class="layer1">
+        <canvas class="can" id="webgl" width="550" height="550">Please use a browser that supports "canvas"</canvas>
+      </div>   
+      <div class="layer2">
+          <p><label for="radius">radius:</label><input id="radius" value="1"></p>
+          <p><label for="height">height:</label><input id="height" value="3"></p>
+          <p><label for="grid">grid:</label><input id="grid" value="16"></p>
+          <p>START</p>
+          <p><label for="center_coord1">center coordinates:</label><input id="center_coord1" value="0,0,0"></p>
+          <p><label for="axis_dir1">axis direction:</label><input id="axis_dir1" value="0,1,0"></p>
+          <p>END</p>
+            <p><label for="center_coord2">center coordinates:</label><input id="center_coord2" value="0,0,0"></p>
+            <p><label for="axis_dir2">axis direction:</label><input id="axis_dir2" value="0,1,0"></p>
+            <button id="show" onclick="main()">Show!</button>
+        </div>        
+      <script src="../lib/webgl-utils.js"></script>
+      <script src="../lib/webgl-debug.js"></script>
+      <script src="../lib/cuon-utils.js"></script>
+      <script type="text/javascript" src="../lib/gl-matrix-min.js"></script>
+      <script src="cone_slerp.js"></script>
+  </body>
+</html>
