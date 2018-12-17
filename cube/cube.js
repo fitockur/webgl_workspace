@@ -2,6 +2,7 @@ var VSHADER_SOURCE =
   'uniform mat4 u_perspectiveMatrix;\n' +
   'uniform mat4 u_modelMatrix;\n' +
   'uniform mat4 u_viewMatrix;\n' +
+  'uniform mat3 u_normalMatrix;\n' +
 
   'attribute vec4 a_Position;\n' +
   'attribute vec3 a_Normal;\n' +
@@ -13,7 +14,7 @@ var VSHADER_SOURCE =
   '  mat4 modelViewMatrix = u_viewMatrix * u_modelMatrix;\n' +
   '  v_Position = modelViewMatrix * a_Position;\n' +
   '  gl_Position = u_perspectiveMatrix * v_Position;\n' +
-  '  v_Normal = normalize( mat3(modelViewMatrix) * a_Normal);\n' + 
+  '  v_Normal = normalize(u_normalMatrix * a_Normal);\n' + 
   '}\n';
 
 var FSHADER_SOURCE =
@@ -28,17 +29,15 @@ var FSHADER_SOURCE =
   'void main() {\n' +
   '  vec3 normal = normalize(v_Normal);\n' + // получаем нормаль
   '  vec3 lightPosition = vec3(u_fViewMatrix * vec4(u_lightPosition, 1) - v_Position);\n' + // получаем вектор направления света
+  '  vec3 viewVec = normalize(vec3(u_fViewMatrix * vec4(0, 0, 0, 1) - v_Position));\n' +
   '  vec3 lightDir = normalize(lightPosition);\n' +
-  '  float lightDist = length(lightPosition);\n' +
-
   '  float specular = 0.0;\n' +
   '  float d = max(dot(v_Normal, lightDir), 0.0);\n' + // получаем скалярное произведение векторов нормали и направления света
   '  if (d > 0.0) {\n' +
-  '    vec3 viewVec = vec3(0,0,1.0);\n' +
   '    vec3 reflectVec = reflect(-lightDir, normal);\n' + // получаем вектор отраженного луча
-  '    specular = pow(max(dot(reflectVec, viewVec), 0.0), 160.0);\n' +
+  '    specular = pow(max(dot(reflectVec, viewVec), 0.0), 100.0);\n' +
   '  }\n' +
-  '  gl_FragColor.rgb = vec3(0.1,0.1,0.1) + vec3(1, 0, 0) * d + specular;\n' + // отраженный свет равен сумме фонового, диффузного и зеркального отражений света
+  '  gl_FragColor.rgb = vec3(0.1,0.1,0.1) + vec3(0.01, 0.01, 0.01) * d + vec3(0.5,0.5,0.5) * specular;\n' + // отраженный свет равен сумме фонового, диффузного и зеркального отражений света
   '  gl_FragColor.a = 1.0;\n' +
   '}\n';
 
@@ -66,18 +65,19 @@ function main() {
   }
 
   // Set the clear color and enable the depth test
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+  gl.clearColor(.7, .7, .7, 1.0);
   gl.enable(gl.DEPTH_TEST);
 
   // Get the storage locations of uniform variables
   var u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_modelMatrix');
+  var u_NormalMatrix = gl.getUniformLocation(gl.program, 'u_normalMatrix');
   var u_viewMatrix = gl.getUniformLocation(gl.program, 'u_viewMatrix');
   var u_perspectiveMatrix = gl.getUniformLocation(gl.program, 'u_perspectiveMatrix');
 
   var u_fViewMatrix = gl.getUniformLocation(gl.program, 'u_fViewMatrix');
   var u_LightPosition = gl.getUniformLocation(gl.program, 'u_lightPosition');
 
-  if (!u_ModelMatrix || !u_viewMatrix || !u_perspectiveMatrix || !u_fViewMatrix || !u_LightPosition) { 
+  if (!u_ModelMatrix || !u_viewMatrix || !u_perspectiveMatrix || !u_fViewMatrix || !u_LightPosition || !u_NormalMatrix) { 
     console.log('Failed to get the storage location');
     return;
   }
@@ -134,12 +134,15 @@ function main() {
 
     function draw(gl, n, projMatrix, viewMatrix, u_perspectiveMatrix, u_viewMatrix, currentAngle) {
         var modelMatrix = mat4.create();
+        var normalMatrix = mat3.create();
         mat4.rotateX(modelMatrix, modelMatrix, glMatrix.toRadian(currentAngle[0]));// ось X
         mat4.rotateY(modelMatrix, modelMatrix, glMatrix.toRadian(currentAngle[1])) // ось Y
 
         gl.uniformMatrix4fv(u_perspectiveMatrix, false, projMatrix);
         gl.uniformMatrix4fv(u_viewMatrix, false, viewMatrix);
         gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix);
+        mat3.normalFromMat4(normalMatrix, modelMatrix);
+        gl.uniformMatrix3fv(u_NormalMatrix, false, normalMatrix);
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
